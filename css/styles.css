@@ -1,0 +1,160 @@
+/* Custom Bootstrap colors */
+:root {
+  --bs-primary: #5e6a75;
+  --bs-secondary: #88a6c2;
+}
+
+body {
+  font-family: "Lato", sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+}
+
+h1,
+h2,
+h3,
+h3.d-flex,
+h4 {
+  font-family: "Arvo", serif !important;
+  font-weight: 700;
+}
+
+.btn {
+  font-family: "Lato", sans-serif;
+  font-weight: 400;
+}
+
+/* Custom Boostrap Primary btn */
+.btn-primary {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: #5e6a75;
+  --bs-btn-border-color: #5e6a75;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #466a8c;
+  --bs-btn-hover-border-color: #466a8c;
+  --bs-btn-focus-shadow-rgb: 49, 132, 253;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #6193c2;
+  --bs-btn-active-border-color: #6193c2;
+  --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-disabled-bg: #0d6efd;
+  --bs-btn-disabled-border-color: #0d6efd;
+}
+
+/* Custom Bootstrap Secondary btn */
+.btn-secondary {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: #88a6c2;
+  --bs-btn-border-color: #88a6c2;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #466a8c;
+  --bs-btn-hover-border-color: #466a8c;
+  --bs-btn-focus-shadow-rgb: 130, 138, 145;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #6193c2;
+  --bs-btn-active-border-color: #6193c2;
+  --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-disabled-bg: #6c757d;
+  --bs-btn-disabled-border-color: #6c757d;
+}
+
+#modal-btn {
+  z-index: 1000;
+  position: absolute;
+}
+
+#header {
+  color: white;
+  background-color: #212529;
+}
+#map {
+  background-color: beige;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.legend {
+  width: 240px;
+  height: auto;
+  padding: 6px 8px;
+  font-size: 1rem;
+  border-radius: 5px;
+  /* Legend is not shown on small screens */
+  display: none;
+}
+
+.legend h3 {
+  font-size: 1.1rem;
+  margin: 0 20px 0 0;
+}
+
+.legend ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 12px 4px 0;
+}
+
+.legend li {
+  list-style-type: none;
+  height: 22px;
+  margin-bottom: 4px;
+}
+
+.legend span {
+  width: 30px;
+  height: 20px;
+  float: left;
+  margin-right: 10px;
+  margin-top: 4px;
+}
+
+/* CSS rule to toggle on/off legend */
+.show-legend {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.leaflet-container {
+  font-family: "Lato", sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+}
+
+#slider,
+#legend,
+.modal-content {
+  background-color: #5e6a75;
+  color: white;
+}
+
+.dropdown-menu {
+  background-color: #5e6a75;
+}
+
+a.dropdown-item {
+  color: #fff;
+}
+
+.min {
+  float: left;
+}
+
+.max {
+  float: right;
+}
+
+/* When screen is 768px or wider */
+@media screen and (min-width: 768px) {
+  #map {
+    border-top: none;
+  }
+  .legend {
+    display: block;
+  }
+  #legend button {
+    display: none;
+  }
+}
