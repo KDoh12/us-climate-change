@@ -30,7 +30,7 @@
   // Array of the months
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   // Array of years
-  const years = ["1900", "1910", "1920", "1930", "1940", "1950", "1960", "1970", "1980", "1990", "2000", "2010", "2020"];
+  // const years = ["1900", "1910", "1920", "1930", "1940", "1950", "1960", "1970", "1980", "1990", "2000", "2010", "2020"];
   // Set the year to initially compare
   let year = "1910";
 
@@ -44,7 +44,7 @@
         download: true,
         header: true,
         complete: function (data) {
-          processData(counties, data);
+          processData(counties, data, "1910");
         },
       });
     })
@@ -62,46 +62,75 @@
   // ****** End adjustHeight ******
 
   // Function to process the data
-  function processData(counties, data) {
+  function processData(counties, data, year) {
+    let years = ["1900", year];
+
     // Loop through all counties and add data
     for (let i of counties.features) {
-      for (let j of data.data) {
-        if (i.properties.GEOID === j.GEOID) {
-          if (j.Year === "1900") {
-            i.properties["1900"] = j;
-            break;
+      for (let y of years) {
+        for (let j of data.data) {
+          if (i.properties.GEOID === j.GEOID) {
+            if (j.Year === y) {
+              i.properties[y] = j;
+              break;
+            }
           }
         }
       }
+      // for (let j of data.data) {
+      //   if (i.properties.GEOID === j.GEOID) {
+      //     if (j.Year === "1900") {
+      //       i.properties["1900"] = j;
+      //       break;
+      //     }
+      //   }
+      // }
     }
 
     console.log(counties);
 
     // Empty array to hold data values
     const rates = [];
+    // Empty object to hold difference values
+    var valueDiff = {
+      Year: years[1],
+    };
     // Loop through counties and populate array
     counties.features.forEach(function (county) {
-      const props = county.properties["1900"];
-      if (props) {
-        for (const prop in props) {
-          if (months.includes(prop) && Number(props[prop]) < 99.9) {
-            rates.push(Number(props[prop]));
+      const compProps = county.properties[years[1]];
+      const subProps = county.properties["1900"];
+      if (compProps && subProps) {
+        for (const prop in compProps) {
+          if (months.includes(prop) && Number(compProps[prop]) < 99.9) {
+            var diff = Number(Number(Number(compProps[prop]) - Number(subProps[prop])).toFixed(1));
+            rates.push(diff);
+            valueDiff[prop] = diff;
           }
         }
       }
+      // const props = county.properties["1900"];
+      // if (props) {
+      //   for (const prop in props) {
+      //     if (months.includes(prop) && Number(props[prop]) < 99.9) {
+      //       rates.push(Number(props[prop]));
+      //     }
+      //   }
+      // }
     });
+    console.log(rates);
+    console.log(valueDiff);
 
     // Create breaks
     var breaks = chroma.limits(rates, "q", 5);
     // Create color generator
     var colorize = chroma.scale(chroma.brewer.Oranges).classes(breaks).mode("lab");
 
-    drawMap(counties, colorize);
+    drawMap(counties, colorize, valueDiff);
     drawLegend(breaks, colorize);
   }
 
   // Function to draw data on the map
-  function drawMap(counties, colorize) {
+  function drawMap(counties, colorize, valueDiff) {
     const dataLayer = L.geoJson(counties, {
       style: function (feature) {
         return {
@@ -113,23 +142,23 @@
       },
     }).addTo(map);
 
-    updateMap(dataLayer, colorize, "Jan");
-    addUI(dataLayer, colorize, "Jan");
+    updateMap(dataLayer, colorize, "Jan", valueDiff);
+    addUI(dataLayer, colorize, "Jan", valueDiff);
   }
   // ****** End drawMap ******
 
   // Function to update the map
-  function updateMap(dataLayer, colorize, currentMonth) {
+  function updateMap(dataLayer, colorize, currentMonth, valueDiff) {
     dataLayer.eachLayer(function (layer) {
-      const props = layer.feature.properties["1900"];
+      const props = layer.feature.properties[valueDiff.Year];
       var tooltipInfo = "";
-      if (props && Number(props[currentMonth]) < 99.9) {
+      if (props) {
         // Style the layer
         layer.setStyle({
-          fillColor: colorize(Number(props[currentMonth])),
+          fillColor: colorize(valueDiff[currentMonth]),
         });
         // Create popup
-        tooltipInfo = `${props[currentMonth]}`;
+        tooltipInfo = `${valueDiff[currentMonth]}`;
       } else {
         tooltipInfo = `No Data`;
       }
@@ -169,7 +198,7 @@
   // ****** End drawLegend ******
 
   // Function to add the UI Slider
-  function addUI(dataLayer, colorize, month) {
+  function addUI(dataLayer, colorize, month, valueDiff) {
     // Add Slider
     const sliderControl = L.control({
       position: "bottomleft",
@@ -190,7 +219,7 @@
       currentMonth = months[e.target.value];
 
       // Update map with current month
-      updateMap(dataLayer, colorize, currentMonth);
+      updateMap(dataLayer, colorize, currentMonth, valueDiff);
 
       // Update legend with current month
       document.querySelector(".legend h3").innerHTML = `${currentMonth} Average Temp (F)`;
