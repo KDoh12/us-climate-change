@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="icon" href="img/uk_favicon_blue.svg" type="image/x-icon" />
+    <!-- Papa Parse JS -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"
+      integrity="sha512-dfX5uYVXzyU8+KHqj8bjo7UkOdg18PaOtpa48djpNbZHwExddghZ+ZmzWT06R5v6NSk3ZUfsH6FNEDepLx9hPQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+
+    <script>
+      const startTime = performance.now();
+
+      fetch("data/calcTest.csv")
+        .then((response) => response.text())
+        .then((csv) => {
+          // Use Papa Parse to parse the CSV data
+          const data = Papa.parse(csv, { header: true }).data;
+
+          // Group the data by GEOID
+          const dataByGEOID = {};
+          data.forEach((row) => {
+            const { GEOID } = row;
+            if (!dataByGEOID[GEOID]) {
+              dataByGEOID[GEOID] = [];
+            }
+            dataByGEOID[GEOID].push(row);
+          });
+
+          // Define an empty object to store the solutions
+          const solutions = {};
+
+          const values = {};
+
+          // Iterate over each group of data by GEOID
+          Object.values(dataByGEOID).forEach((group) => {
+            // Iterate over each year and month combination in the group
+            for (let year of group.map((row) => row.Year)) {
+              for (let month of Object.keys(group[0]).filter((key) => key != "GEOID" && key != "Year" && key != "Annual")) {
+                // Find the row for the current year and month
+                const currentRow = group.find((row) => row.Year == year);
+
+                // Calculate the difference between the current month value for the current year
+                // and the same month value for all other rows with the same GEOID value and a non-negative year difference
+                const monthDiffs = group
+                  .filter((row) => row.Year != year && currentRow.Year - row.Year >= 0)
+                  .map((row) => ({
+                    year: row.Year,
+                    difference: Number((currentRow[month] - row[month]).toFixed(1)),
+                  }));
+
+                // Add the month differences to the solutions object
+                if (!solutions[month]) {
+                  solutions[month] = {};
+                }
+                solutions[month][`${currentRow.GEOID}-${year}`] = monthDiffs;
+
+                // Add the month differences to the Values object grouped by year
+                monthDiffs.forEach((diff) => {
+                  const { year, difference } = diff;
+                  if (!values[year]) {
+                    values[year] = [];
+                  }
+                  values[year].push(difference);
+                });
+              }
+            }
+          });
+
+          // Output the solutions to the console
+          console.log(solutions);
+          console.log(values);
+
+          const endTime = performance.now();
+          const duration = (endTime - startTime) / 1000;
+          console.log(`Execution time: ${duration} seconds`);
+        })
+        .catch((error) => console.error(error));
+    </script>
+  </head>
+</html>
