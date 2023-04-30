@@ -1,7 +1,7 @@
 (function () {
   // Adjust Height of map
   adjustHeight();
-  window.addEventListener("resize", adjustHeight());
+  window.addEventListener("resize", adjustHeight);
 
   // Add event listener to toggle on/off the legend button
   const button = document.querySelector("#legend button");
@@ -27,26 +27,26 @@
   });
   tileLayer.addTo(map);
 
-  // Array of the months
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  // Array of years
-  // const years = ["1900", "1910", "1920", "1930", "1940", "1950", "1960", "1970", "1980", "1990", "2000", "2010", "2020"];
-  // Set the year to initially compare
-  let year = "1910";
-
   // AJAX request for GeoJSON data
   fetch("data/us_counties_2020_20m.geojson")
     .then(function (response) {
       return response.json();
     })
     .then(function (counties) {
-      Papa.parse("data/AvgTempCounties.csv", {
+      Papa.parse("data/AvgTempCounties_Annual.csv", {
         download: true,
         header: true,
         complete: function (data) {
-          processData(counties, data, "1910");
+          processData(counties, data);
         },
       });
+      return fetch("data/us_states_20m.geojson")
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (states) {
+          addStates(states);
+        });
     })
     .catch(function (error) {
       console.log(error);
@@ -62,75 +62,22 @@
   // ****** End adjustHeight ******
 
   // Function to process the data
-  function processData(counties, data, year) {
-    let years = ["1900", year];
-
+  function processData(counties, data) {
     // Loop through all counties and add data
     for (let i of counties.features) {
-      for (let y of years) {
-        for (let j of data.data) {
-          if (i.properties.GEOID === j.GEOID) {
-            if (j.Year === y) {
-              i.properties[y] = j;
-              break;
-            }
-          }
+      for (let j of data.data) {
+        if (i.properties.GEOID === j.GEOID) {
+          i.properties.Temp = j;
         }
       }
-      // for (let j of data.data) {
-      //   if (i.properties.GEOID === j.GEOID) {
-      //     if (j.Year === "1900") {
-      //       i.properties["1900"] = j;
-      //       break;
-      //     }
-      //   }
-      // }
     }
 
-    console.log(counties);
-
-    // Empty array to hold data values
-    const rates = [];
-    // Empty object to hold difference values
-    var valueDiff = {
-      Year: years[1],
-    };
-    // Loop through counties and populate array
-    counties.features.forEach(function (county) {
-      const compProps = county.properties[years[1]];
-      const subProps = county.properties["1900"];
-      if (compProps && subProps) {
-        for (const prop in compProps) {
-          if (months.includes(prop) && Number(compProps[prop]) < 99.9) {
-            var diff = Number(Number(Number(compProps[prop]) - Number(subProps[prop])).toFixed(1));
-            rates.push(diff);
-            valueDiff[prop] = diff;
-          }
-        }
-      }
-      // const props = county.properties["1900"];
-      // if (props) {
-      //   for (const prop in props) {
-      //     if (months.includes(prop) && Number(props[prop]) < 99.9) {
-      //       rates.push(Number(props[prop]));
-      //     }
-      //   }
-      // }
-    });
-    console.log(rates);
-    console.log(valueDiff);
-
-    // Create breaks
-    var breaks = chroma.limits(rates, "q", 5);
-    // Create color generator
-    var colorize = chroma.scale(chroma.brewer.Oranges).classes(breaks).mode("lab");
-
-    drawMap(counties, colorize, valueDiff);
-    drawLegend(breaks, colorize);
+    drawMap(counties);
   }
+  // ****** End processData ******
 
-  // Function to draw data on the map
-  function drawMap(counties, colorize, valueDiff) {
+  // // Function to draw data on the map
+  function drawMap(counties) {
     const dataLayer = L.geoJson(counties, {
       style: function (feature) {
         return {
@@ -142,33 +89,97 @@
       },
     }).addTo(map);
 
-    updateMap(dataLayer, colorize, "Jan", valueDiff);
-    addUI(dataLayer, colorize, "Jan", valueDiff);
+    updateMap(dataLayer, "1910", "1900");
+    addUI(dataLayer, "1910", "1900");
   }
   // ****** End drawMap ******
 
   // Function to update the map
-  function updateMap(dataLayer, colorize, currentMonth, valueDiff) {
+  function updateMap(dataLayer, startYear, minYear) {
+    // Empty array to hold data values
+    const rates = [];
+
+    // Loop through counties
     dataLayer.eachLayer(function (layer) {
-      const props = layer.feature.properties[valueDiff.Year];
-      var tooltipInfo = "";
+      let difference;
+      const props = layer.feature.properties.Temp;
       if (props) {
-        // Style the layer
-        layer.setStyle({
-          fillColor: colorize(valueDiff[currentMonth]),
-        });
-        // Create popup
-        tooltipInfo = `${valueDiff[currentMonth]}`;
+        if (props[startYear] && props[minYear] && props[startYear] != "99.9" && props[minYear] != "99.9") {
+          difference = Number(Number(props[startYear] - props[minYear]).toFixed(1));
+          rates.push(difference);
+        } else {
+          difference = 99.9;
+        }
       } else {
-        tooltipInfo = `No Data`;
+        difference = 99.9;
+      }
+      layer.feature.properties.Difference = difference;
+    });
+
+    // Create breaks
+    var breaks = getClassBreaks(rates);
+
+    dataLayer.eachLayer(function (layer) {
+      const props = layer.feature.properties;
+      let popupInfo = `<b>${props.NAME} County</b><br>`;
+      if (props.Difference && props.Difference < 99.9) {
+        layer.setStyle({
+          fillColor: getColor(props.Difference, breaks), // colorize(props.Difference),
+        });
+
+        popupInfo += `${minYear}: ${props.Temp[minYear]} &deg;F<br>
+                        ${startYear}: ${props.Temp[startYear]} &deg;F<br>
+                        Difference: ${props.Difference} &deg;F`;
+      } else {
+        popupInfo += `No Data Available`;
       }
 
-      layer.bindTooltip(tooltipInfo);
+      layer.bindPopup(popupInfo);
+
+      layer.on("mouseover", function () {
+        layer
+          .setStyle({
+            color: "#51dbdd",
+            fillOpacity: 0.8,
+            weight: 2,
+          })
+          .bringToFront();
+      });
+
+      layer.on("mouseout", function () {
+        layer
+          .setStyle({
+            color: "#4D4D4D",
+            fillOpacity: 1,
+            weight: 1,
+          })
+          .bringToBack();
+      });
+
+      layer.on("popupopen", function () {
+        layer
+          .setStyle({
+            color: "#F0DF30",
+            weight: 2,
+          })
+          .bringToFront();
+      });
+
+      layer.on("popupclose", function () {
+        layer
+          .setStyle({
+            color: "#4D4D4D",
+            weight: 1,
+          })
+          .bringToBack();
+      });
     });
+
+    drawLegend(breaks);
   }
   // ****** End updateMap ******
 
-  // Function to draw the legend
+  // // Function to draw the legend
   function drawLegend(breaks, colorize) {
     // Add Legend
     const legendControl = L.control({
@@ -183,80 +194,90 @@
     legendControl.addTo(map);
 
     // Build legend
-    const legend = document.querySelector(".legend");
-    legend.innerHTML = `<h3>Jan Average Temp (F)</h3><ul>`;
-    legend.innerHTML += `<li><span style="background:#363636"></span> No Data Available</li>`;
+    const legend = document.querySelector("#legend");
+    legend.innerHTML = `<h3>Temp (&deg;F) Difference</h3><ul>`;
+    legend.innerHTML += `<li><span style="background:#363636"></span> No Data</li>`;
 
     // Loop break values and add to legend
-    for (let i = 0; i < breaks.length - 1; i++) {
-      const color = colorize(breaks[i], breaks);
-      const classRange = `<li><span style="background:${color}"></span> ${breaks[i]} &mdash; ${breaks[i + 1]}</li>`;
+    for (let i = 0; i < breaks.length; i++) {
+      const color = getColor(breaks[i][0], breaks);
+      const classRange = `<li><span style="background:${color}"></span> ${breaks[i][0]}&deg; &mdash; ${breaks[i][1]}&deg;</li>`;
       legend.innerHTML += classRange;
     }
     legend.innerHTML += `</ul>`;
   }
-  // ****** End drawLegend ******
+  // // ****** End drawLegend ******
 
-  // Function to add the UI Slider
-  function addUI(dataLayer, colorize, month, valueDiff) {
-    // Add Slider
-    const sliderControl = L.control({
-      position: "bottomleft",
-    });
-    sliderControl.onAdd = function () {
-      const controls = L.DomUtil.get("slider");
-      L.DomEvent.disableScrollPropagation(controls);
-      L.DomEvent.disableClickPropagation(controls);
-      return controls;
-    };
-    sliderControl.addTo(map);
-
-    // Get slider value
-    let currentMonth = month;
-    slider = document.querySelector(".form-range");
-    slider.addEventListener("input", function (e) {
-      // console.log(months[e.target.value]);
-      currentMonth = months[e.target.value];
-
-      // Update map with current month
-      updateMap(dataLayer, colorize, currentMonth, valueDiff);
-
-      // Update legend with current month
-      document.querySelector(".legend h3").innerHTML = `${currentMonth} Average Temp (F)`;
+  // Function to add the UI
+  function addUI(dataLayer, startYear, minYear) {
+    // Get dropdown value
+    let minDropdown = document.querySelector("#minYear");
+    minDropdown.addEventListener("change", function (e) {
+      minYear = e.target.value;
+      console.log(minYear);
     });
 
     // Get dropdown value
-    let dropdown = document.querySelector("#dropdown-ui");
-    dropdown.addEventListener("change", function (e) {
-      year = e.target.value;
-      console.log(year);
+    let startDropdown = document.querySelector("#startYear");
+    startDropdown.addEventListener("change", function (e) {
+      startYear = e.target.value;
+      console.log(startYear);
+    });
+
+    // Add Calculate button functionality
+    const calcButton = document.querySelector("#calculate");
+    calcButton.addEventListener("click", function (e) {
+      if (Number(startYear - minYear) < 0) {
+        return alert("Please choose a starting decade lower than the ending decade.");
+      } else if (Number(startYear - minYear === 0)) {
+        return alert("The starting and ending decade are the same. Please choose a starting decade lower than the ending decade.");
+      } else {
+        updateMap(dataLayer, startYear, minYear);
+      }
     });
   }
   // ****** End addUI ******
 
-  // Function to get the selected year
-  function getYear() {}
+  // Function to get class breaks
+  function getClassBreaks(rates) {
+    const clusters = ss.ckmeans(rates, 5);
 
-  /* When the user clicks on the button,
-  toggle between hiding and showing the dropdown content */
-  function myFunction() {
-    document.getElementById("myDropdown").classList.toggle("show");
+    const breaks = clusters.map(function (cluster) {
+      return [cluster[0], cluster.pop()];
+    });
+
+    return breaks;
   }
 
-  function dropFilter() {
-    var input, filter, ul, li, a, i;
-    input = document.getElementById("myInput");
-    filter = input.value.toUpperCase();
-    div = document.getElementById("myDropdown");
-    a = div.getElementsByTagName("a");
-    for (i = 0; i < a.length; i++) {
-      txtValue = a[i].textContent || a[i].innerText;
-      if (txtValue.toUpperCase().indexOf(filter) > -1) {
-        a[i].style.display = "";
-      } else {
-        a[i].style.display = "none";
-      }
+  // Function to get color
+  function getColor(value, breaks) {
+    if (value <= breaks[0][1]) {
+      return "#2b83ba";
+    } else if (value <= breaks[1][1]) {
+      return "#abdda4";
+    } else if (value <= breaks[2][1]) {
+      return "#ffffbf";
+    } else if (value <= breaks[3][1]) {
+      return "#fdae61";
+    } else if (value <= breaks[4][1]) {
+      return "#d7191c";
     }
   }
-  // ****** End dropFilter ******
+
+  // Function to add states
+  function addStates(states) {
+    const statesLayer = L.geoJson(states, {
+      style: function (feature) {
+        return {
+          fill: false,
+          color: "#999999",
+          weight: 2,
+          opacity: 0.5,
+          dashArray: "[5, 0, 5]",
+        };
+      },
+    }).bringToFront();
+
+    statesLayer.addTo(map);
+  }
 })();

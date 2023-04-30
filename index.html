@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Final</title>
+    <title>U.S. Climate</title>
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
     <link rel="icon" href="img/uk_favicon_blue.svg" type="image/x-icon" />
     <!-- Bootstrap CSS -->
@@ -29,15 +29,48 @@
   <body>
     <!-- Header -->
     <header id="header" class="d-flex flex-wrap justify-content-center py-3">
-      <h3 class="d-flex align-items-center ms-3 mb-3 mb-md-0 me-md-auto">Heating Up?</h3>
+      <h3 class="align-items-center ms-3 mb-3 mb-md-0 me-md-auto">Heating Up?</h3>
 
-      <div class="dropdown">
-        <select id="dropdown-ui" class="form-select" aria-label="Default select">
+      <div class="dropdown me-3 justify-content-center">
+        Starting Decade
+        <select id="minYear" class="form-select" aria-label="minYear select" autocomplete="off">
+          <!-- <option selected>Choose a year to compare</option> -->
+          <option value="1900" selected>1900</option>
+          <option value="1910">1910</option>
+          <option value="1920">1920</option>
+          <option value="1930">1930</option>
+          <option value="1940">1940</option>
+          <option value="1950">1950</option>
+          <option value="1960">1960</option>
+          <option value="1970">1970</option>
+          <option value="1980">1980</option>
+          <option value="1990">1990</option>
+          <option value="2000">2000</option>
+          <option value="2010">2010</option>
+          <option value="2020">2020</option>
+        </select>
+      </div>
+
+      <div class="dropdown me-3 justify-content-center">
+        Ending Decade
+        <select id="startYear" class="form-select" aria-label="startYear select" autocomplete="off">
           <!-- <option selected>Choose a year to compare</option> -->
           <option value="1910" selected>1910</option>
           <option value="1920">1920</option>
+          <option value="1930">1930</option>
+          <option value="1940">1940</option>
+          <option value="1950">1950</option>
+          <option value="1960">1960</option>
+          <option value="1970">1970</option>
+          <option value="1980">1980</option>
+          <option value="1990">1990</option>
+          <option value="2000">2000</option>
+          <option value="2010">2010</option>
+          <option value="2020">2020</option>
         </select>
       </div>
+
+      <button type="button" id="calculate" class="btn btn-primary me-3 align-self-center">Compare</button>
     </header>
 
     <!-- Map -->
@@ -47,30 +80,37 @@
           <div id="map"></div>
           <!-- Map Info Button -->
           <button type="button" id="modal-btn" class="btn btn-primary mt-2 ms-2" data-bs-toggle="modal" data-bs-target="#Modal">Map Info</button>
-          <!-- UI Slider -->
-          <div id="slider" class="shadow-sm p-3 rounded-2">
-            <span class="min">Jan</span>
-            <span class="max">Dec</span>
-            <input type="range" class="form-range" min="0" max="11" step="1" />
-          </div>
           <!-- Legend -->
           <div id="legend" class="legend">
             <!-- <div class="leaflet-legend">Legend goes here...</div> -->
-            <button id="btn-legend" class="btn btn-secondary float-end">Legend</button>
+            <button type="button" class="btn btn-secondary float-end">Legend</button>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Map Info Modal -->
-    <div class="modal fade" id="Modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="Modal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+            <h1 class="modal-title fs-4">Heating Up?</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body">...</div>
+          <div class="modal-body">
+            <p>Climate change is real! This map aims to help visualize how climate has changed over the decades.</p>
+            <p>
+              Choose a starting decade and an ending decade, then hit the compare button to see the difference between the annual average temperature
+              &deg;F of those decades, per county.
+            </p>
+            <img class="img-fluid" src="img/modal-img.png" alt="activist holding climate chagne sign" /><br /><br />
+            <ul>
+              <li>Map authored by Kevin Dohner</li>
+              <li>Created May 2023</li>
+              <li>For more info, check out the <a href="https://github.com/KDoh12/us-climate-change" target="_blank">project page!</a></li>
+              <li>To see more projects, check out my <a href="kdoh12.github.io" target="_blank">portolio!</a></li>
+            </ul>
+          </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           </div>
@@ -97,10 +137,10 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>
-    <!-- Chroma JS -->
+    <!-- Simple Statistics JS -->
     <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.4.2/chroma.min.js"
-      integrity="sha512-zInFF17qBFVvvvFpIfeBzo7Tj7+rQxLeTJDmbxjBz5/zIr89YVbTNelNhdTT+/DCrxoVzBeUPVFJsczKbB7sew=="
+      src="https://cdnjs.cloudflare.com/ajax/libs/simple-statistics/7.8.3/simple-statistics.min.js"
+      integrity="sha512-20e6vQxuYnKMdwYkMA+16QfkAXLyNMtHY3ffIbQiH+GJM7Anux6j1PA6Ah2nyhB/ZNM/+wFlDulOKug7QCw2RQ=="
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>
