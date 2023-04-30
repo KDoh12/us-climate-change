@@ -9,6 +9,8 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+    integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
     <style>
       .container {
         width: 100%;
@@ -17,7 +19,12 @@
     </head>
     <body>
       <div class="container"></div>
-    
+      <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+    integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.2/chroma.min.js"
+    integrity="sha512-8TVPS0EFkkmtT6yPb5K4csnSt3tjbKRrs0F8gvTNKv2OxOcwDO7+Klkz86gMVrzfqtZos5N2a+k+r9D+hlccmQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <script>
       const startTime = performance.now();
@@ -39,7 +46,7 @@
             dataByGEOID[GEOID].push(row);
           });
           // console.log(dataByGEOID)
-          findTempRange(dataByGEOID);
+          // findTempRange(dataByGEOID);
           
           // // Define an empty object to store the solutions
           // const solutions = {};
@@ -94,35 +101,38 @@
       function findTempRange(data) {
         const range = []
         const byCounty = {}
-        // const months = Object.keys(data[0]).filter((key) => key != "GEOID" && key != "Year" && key != "Annual") 
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
         const years = ['1900', '1910', '1920', '1930', '1940', '1950', '1960', '1970', '1980', '1990', '2000', '2010', '2020']
-        for (row in data) {
+        // Loop over each county
+        for (let row in data) {
+          // Loop over each year
           data[row].forEach((year) => {
             const c = data[row]
             byCounty[row] = {}
             let title = ''
+            // Loop over each year again to compare all years
             for (let i = 0; i < c.length; i++) {
+              // Loop over each possible year for comparison
               for (let j = years.length - 1; j >= 0; j--) {
+                // Find the row for the current year
                 const h = c.find(r => r.Year === years[j]);
                 if (h) {
                     title = `${h.Year}-${c[i].Year}`
                     byCounty[row][title] = []
                   }
+                // Loop over each month to compare
                 for (let k = 0; k < months.length; k++) {
                   if (h && h.Year > c[i].Year) {
                     const diff = (h[months[k]] - c[i][months[k]]).toFixed(2)
                     byCounty[row][title].push(Number(diff))
-                    // console.log(diff, h.Year, c[i].Year)
                     range.push(Number(diff))
                   }
-                  // console.log(h[months[k]], h.Year, months[k], c[i][months[k]], c[i].Year)
                 }
               }
             }
           })
         };
-
+        // Remove empty arrays
         for (let c in byCounty) {
           for (let t in byCounty[c]) {
             if (byCounty[c][t].length === 0) {
@@ -130,11 +140,20 @@
             }
           }
         }
+
+        // Create class breaks
+        const breaks = chroma.limits(range, 'k', 10);
+        const breaks2 = chroma.limits(range, 'q', 10);
+        // const breaks3 = ...
+        // Add more classification methods. TIP: Try simple statistics library, e.g., "equal_interval", "quantiles", "standard_deviation", "geometric_progression", "natural_breaks", etc... 
+
         console.log(range)
         console.log(byCounty)
+        console.log(breaks, breaks2)
         const endTime = performance.now();
         const duration = (endTime - startTime) / 1000;
         console.log(`Execution time: ${duration} seconds`);
+        // Display the data to copy to new file
         displayData(byCounty)
       }
 
