@@ -107,17 +107,15 @@ h4 {
 }
 
 .legend {
-  width: 240px;
+  width: auto;
   height: auto;
   padding: 6px 8px;
   font-size: 1rem;
   border-radius: 5px;
-  /* Legend is not shown on small screens */
-  /* display: none; */
 }
 
 .legend h3 {
-  font-size: 1.1rem;
+  font-size: 1rem;
   margin: 0 20px 0 0;
 }
 
@@ -128,6 +126,7 @@ h4 {
 }
 
 .legend li {
+  font-size: 0.8rem;
   list-style-type: none;
   height: 22px;
   margin-bottom: 4px;
@@ -141,17 +140,31 @@ h4 {
   margin-top: 4px;
 }
 
-/* CSS rule to toggle on/off legend */
-.show-legend {
-  display: block;
-  margin-bottom: 10px;
-}
-
 .leaflet-container {
   font-family: "Lato", sans-serif;
   font-weight: 400;
-  font-size: 1rem;
+  font-size: 0.8rem;
 }
+
+/* Custom leaflet popup */
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: #5e6a75;
+  color: white;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.4);
+}
+
+.leaflet-popup-content {
+  margin: 10px 24px 10px 10px;
+  line-height: 1.3;
+  font-size: 1.1em;
+  min-height: 1px;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  color: white;
+}
+/* ------------------------------------------------ */
 
 #legend,
 .modal-content {
@@ -168,16 +181,15 @@ h4 {
   color: #edd818;
 }
 
+.modal ul {
+  list-style: none;
+  padding: 0;
+}
+
 /* When screen is 768px or wider */
 @media screen and (min-width: 768px) {
   #map {
     border-top: none;
-  }
-  .legend {
-    display: block;
-  }
-  #legend button {
-    display: none;
   }
   .d-flex h3 {
     display: flex;

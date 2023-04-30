@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Final</title>
+    <title>U.S. Climate</title>
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
     <link rel="icon" href="img/uk_favicon_blue.svg" type="image/x-icon" />
     <!-- Bootstrap CSS -->
@@ -29,7 +29,7 @@
   <body>
     <!-- Header -->
     <header id="header" class="d-flex flex-wrap justify-content-center py-3">
-      <h3 class=" align-items-center ms-3 mb-3 mb-md-0 me-md-auto">Heating Up?</h3>
+      <h3 class="align-items-center ms-3 mb-3 mb-md-0 me-md-auto">Heating Up?</h3>
 
       <div class="dropdown me-3 justify-content-center">
         Starting Decade
@@ -83,7 +83,7 @@
           <!-- Legend -->
           <div id="legend" class="legend">
             <!-- <div class="leaflet-legend">Legend goes here...</div> -->
-            <button class="btn btn-secondary float-end">Legend</button>
+            <button type="button" class="btn btn-secondary float-end">Legend</button>
           </div>
         </div>
       </div>
@@ -98,10 +98,15 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
+            <p>Climate change is real! This map aims to help visualize how climate has changed over the decades.</p>
             <p>
-              Climate change is real! This map aims to help visualize how climate has changed over the decades. Choose a starting decade and an ending decade, then hit the compare button to see the difference between the annual average temperature (&#176F) of those decades, per county.
+              Choose a starting decade and an ending decade, then hit the compare button to see the difference between the annual average temperature
+              &deg;F of those decades, per county.
             </p>
+            <img class="img-fluid" src="img/modal-img.png" alt="activist holding climate chagne sign" /><br /><br />
             <ul>
+              <li>Map authored by Kevin Dohner</li>
+              <li>Created May 2023</li>
               <li>For more info, check out the <a href="https://github.com/KDoh12/us-climate-change" target="_blank">project page!</a></li>
               <li>To see more projects, check out my <a href="kdoh12.github.io" target="_blank">portolio!</a></li>
             </ul>
@@ -132,10 +137,10 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>
-    <!-- Chroma JS -->
+    <!-- Simple Statistics JS -->
     <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.4.2/chroma.min.js"
-      integrity="sha512-zInFF17qBFVvvvFpIfeBzo7Tj7+rQxLeTJDmbxjBz5/zIr89YVbTNelNhdTT+/DCrxoVzBeUPVFJsczKbB7sew=="
+      src="https://cdnjs.cloudflare.com/ajax/libs/simple-statistics/7.8.3/simple-statistics.min.js"
+      integrity="sha512-20e6vQxuYnKMdwYkMA+16QfkAXLyNMtHY3ffIbQiH+GJM7Anux6j1PA6Ah2nyhB/ZNM/+wFlDulOKug7QCw2RQ=="
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>

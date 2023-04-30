@@ -40,6 +40,13 @@
           processData(counties, data);
         },
       });
+      return fetch("data/us_states_20m.geojson")
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (states) {
+          addStates(states);
+        });
     })
     .catch(function (error) {
       console.log(error);
@@ -89,7 +96,7 @@
 
   // Function to update the map
   function updateMap(dataLayer, startYear, minYear) {
-    // // Empty array to hold data values
+    // Empty array to hold data values
     const rates = [];
 
     // Loop through counties
@@ -109,31 +116,25 @@
       layer.feature.properties.Difference = difference;
     });
 
-    console.log(dataLayer);
     // Create breaks
-    var breaks = [-5, -2.5, -0.1, 0, 0.1, 2.5, 5];
-    // var breaks = chroma.limits(rates, "k", 5);
-    // Define the scale
-    var scale = ["#2b83ba", "#abdda4", "#ffffbf", "#fdae61", "#d7191c"];
-    // Create color generator
-    var colorize = chroma.scale(scale).classes(breaks).mode("lab");
+    var breaks = getClassBreaks(rates);
 
     dataLayer.eachLayer(function (layer) {
       const props = layer.feature.properties;
-      let tooltipInfo = `${props.NAME} County<br>`;
+      let popupInfo = `<b>${props.NAME} County</b><br>`;
       if (props.Difference && props.Difference < 99.9) {
         layer.setStyle({
-          fillColor: colorize(props.Difference),
+          fillColor: getColor(props.Difference, breaks), // colorize(props.Difference),
         });
 
-        tooltipInfo += `${minYear}: ${props.Temp[minYear]} &#176F<br>
-                        ${startYear}: ${props.Temp[startYear]} &#176F<br>
-                        Difference: ${props.Difference} &#176F`;
+        popupInfo += `${minYear}: ${props.Temp[minYear]} &deg;F<br>
+                        ${startYear}: ${props.Temp[startYear]} &deg;F<br>
+                        Difference: ${props.Difference} &deg;F`;
       } else {
-        tooltipInfo += `No Data Available`;
+        popupInfo += `No Data Available`;
       }
 
-      layer.bindTooltip(tooltipInfo);
+      layer.bindPopup(popupInfo);
 
       layer.on("mouseover", function () {
         layer
@@ -146,15 +147,35 @@
       });
 
       layer.on("mouseout", function () {
-        layer.setStyle({
-          color: "#202020",
-          fillOpacity: 1,
-          weight: 1,
-        });
+        layer
+          .setStyle({
+            color: "#4D4D4D",
+            fillOpacity: 1,
+            weight: 1,
+          })
+          .bringToBack();
+      });
+
+      layer.on("popupopen", function () {
+        layer
+          .setStyle({
+            color: "#F0DF30",
+            weight: 2,
+          })
+          .bringToFront();
+      });
+
+      layer.on("popupclose", function () {
+        layer
+          .setStyle({
+            color: "#4D4D4D",
+            weight: 1,
+          })
+          .bringToBack();
       });
     });
 
-    drawLegend(breaks, colorize);
+    drawLegend(breaks);
   }
   // ****** End updateMap ******
 
@@ -174,13 +195,13 @@
 
     // Build legend
     const legend = document.querySelector("#legend");
-    legend.innerHTML = `<h3>Annual Temp (F) Difference</h3><ul>`;
-    legend.innerHTML += `<li><span style="background:#363636"></span> No Data Available</li>`;
+    legend.innerHTML = `<h3>Temp (&deg;F) Difference</h3><ul>`;
+    legend.innerHTML += `<li><span style="background:#363636"></span> No Data</li>`;
 
     // Loop break values and add to legend
-    for (let i = 0; i < breaks.length - 1; i++) {
-      const color = colorize(breaks[i], breaks);
-      const classRange = `<li><span style="background:${color}"></span> ${breaks[i]} &mdash; ${breaks[i + 1]}</li>`;
+    for (let i = 0; i < breaks.length; i++) {
+      const color = getColor(breaks[i][0], breaks);
+      const classRange = `<li><span style="background:${color}"></span> ${breaks[i][0]}&deg; &mdash; ${breaks[i][1]}&deg;</li>`;
       legend.innerHTML += classRange;
     }
     legend.innerHTML += `</ul>`;
@@ -216,4 +237,47 @@
     });
   }
   // ****** End addUI ******
+
+  // Function to get class breaks
+  function getClassBreaks(rates) {
+    const clusters = ss.ckmeans(rates, 5);
+
+    const breaks = clusters.map(function (cluster) {
+      return [cluster[0], cluster.pop()];
+    });
+
+    return breaks;
+  }
+
+  // Function to get color
+  function getColor(value, breaks) {
+    if (value <= breaks[0][1]) {
+      return "#2b83ba";
+    } else if (value <= breaks[1][1]) {
+      return "#abdda4";
+    } else if (value <= breaks[2][1]) {
+      return "#ffffbf";
+    } else if (value <= breaks[3][1]) {
+      return "#fdae61";
+    } else if (value <= breaks[4][1]) {
+      return "#d7191c";
+    }
+  }
+
+  // Function to add states
+  function addStates(states) {
+    const statesLayer = L.geoJson(states, {
+      style: function (feature) {
+        return {
+          fill: false,
+          color: "#999999",
+          weight: 2,
+          opacity: 0.5,
+          dashArray: "[5, 0, 5]",
+        };
+      },
+    }).bringToFront();
+
+    statesLayer.addTo(map);
+  }
 })();
