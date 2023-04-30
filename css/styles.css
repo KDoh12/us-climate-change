@@ -2,6 +2,8 @@
 :root {
   --bs-primary: #5e6a75;
   --bs-secondary: #88a6c2;
+  --bs-link-color: #a19108;
+  --bs-link-hover-color: #edd818;
 }
 
 body {
@@ -13,7 +15,7 @@ body {
 h1,
 h2,
 h3,
-h3.d-flex,
+h3,
 h4 {
   font-family: "Arvo", serif !important;
   font-weight: 700;
@@ -60,6 +62,29 @@ h4 {
   --bs-btn-disabled-border-color: #6c757d;
 }
 
+/* Custom bootstrap form-select */
+.form-select {
+  display: block;
+  width: 100%;
+  padding: 0.375rem 2.25rem 0.375rem 0.75rem;
+  -moz-padding-start: calc(0.75rem - 3px);
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #fff;
+  background-color: #5e6a75;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 16px 12px;
+  border: 1px solid #5e6a75;
+  border-radius: 0.375rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
 #modal-btn {
   z-index: 1000;
   position: absolute;
@@ -69,6 +94,11 @@ h4 {
   color: white;
   background-color: #212529;
 }
+
+.d-flex h3 {
+  display: none;
+}
+
 #map {
   background-color: beige;
   position: absolute;
@@ -83,7 +113,7 @@ h4 {
   font-size: 1rem;
   border-radius: 5px;
   /* Legend is not shown on small screens */
-  display: none;
+  /* display: none; */
 }
 
 .legend h3 {
@@ -123,27 +153,19 @@ h4 {
   font-size: 1rem;
 }
 
-#slider,
 #legend,
 .modal-content {
   background-color: #5e6a75;
   color: white;
 }
 
-.dropdown-menu {
-  background-color: #5e6a75;
+.a {
+  color: #a19108;
+  text-decoration: underline;
 }
 
-a.dropdown-item {
-  color: #fff;
-}
-
-.min {
-  float: left;
-}
-
-.max {
-  float: right;
+.a :hover {
+  color: #edd818;
 }
 
 /* When screen is 768px or wider */
@@ -156,5 +178,8 @@ a.dropdown-item {
   }
   #legend button {
     display: none;
+  }
+  .d-flex h3 {
+    display: flex;
   }
 }
