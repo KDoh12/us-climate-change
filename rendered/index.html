@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Final</title>
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <link rel="icon" href="img/uk_favicon_blue.svg" type="image/x-icon" />
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65"
+      crossorigin="anonymous"
+    />
+    <!-- Leaflet CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+      integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI="
+      crossorigin=""
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- GoogleFonts -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Arvo|Lato"
+      rel="stylesheet"
+    />
+    <style>
+      /* Custom Bootstrap colors */
+      :root {
+        --bs-primary: #5e6a75;
+        --bs-secondary: #88a6c2;
+      }
+
+      body {
+        font-family: "Lato", sans-serif;
+        font-weight: 400;
+        font-size: 1rem;
+      }
+
+      h1,
+      h2,
+      h3,
+      h3.d-flex,
+      h4 {
+        font-family: "Arvo", serif !important;
+        font-weight: 700;
+      }
+
+      .btn {
+        font-family: "Lato", sans-serif;
+        font-weight: 400;
+      }
+
+      /* Custom Boostrap Primary btn */
+      .btn-primary {
+        --bs-btn-color: #fff;
+        --bs-btn-bg: #5e6a75;
+        --bs-btn-border-color: #5e6a75;
+        --bs-btn-hover-color: #fff;
+        --bs-btn-hover-bg: #466a8c;
+        --bs-btn-hover-border-color: #466a8c;
+        --bs-btn-focus-shadow-rgb: 49, 132, 253;
+        --bs-btn-active-color: #fff;
+        --bs-btn-active-bg: #6193c2;
+        --bs-btn-active-border-color: #6193c2;
+        --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+        --bs-btn-disabled-color: #fff;
+        --bs-btn-disabled-bg: #0d6efd;
+        --bs-btn-disabled-border-color: #0d6efd;
+      }
+
+      /* Custom Bootstrap Secondary btn */
+      .btn-secondary {
+        --bs-btn-color: #fff;
+        --bs-btn-bg: #88a6c2;
+        --bs-btn-border-color: #88a6c2;
+        --bs-btn-hover-color: #fff;
+        --bs-btn-hover-bg: #466a8c;
+        --bs-btn-hover-border-color: #466a8c;
+        --bs-btn-focus-shadow-rgb: 130, 138, 145;
+        --bs-btn-active-color: #fff;
+        --bs-btn-active-bg: #6193c2;
+        --bs-btn-active-border-color: #6193c2;
+        --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+        --bs-btn-disabled-color: #fff;
+        --bs-btn-disabled-bg: #6c757d;
+        --bs-btn-disabled-border-color: #6c757d;
+      }
+
+      #modal-btn {
+        z-index: 1000;
+        position: absolute;
+      }
+
+      #header {
+        color: white;
+        background-color: #212529;
+      }
+
+      #map {
+        background-color: beige;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+      }
+
+      .legend {
+        width: 240px;
+        height: auto;
+        padding: 6px 8px;
+        font-size: 1rem;
+        border-radius: 5px;
+        /* Legend is not shown on small screens */
+        display: none;
+      }
+
+      .legend h3 {
+        font-size: 1.1rem;
+        margin: 0 20px 0 0;
+      }
+
+      .legend ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 12px 4px 0;
+      }
+
+      .legend li {
+        list-style-type: none;
+        height: 22px;
+        margin-bottom: 4px;
+      }
+
+      .legend span {
+        width: 30px;
+        height: 20px;
+        float: left;
+        margin-right: 10px;
+        margin-top: 4px;
+      }
+
+      /* CSS rule to toggle on/off legend */
+      .show-legend {
+        display: block;
+        margin-bottom: 10px;
+      }
+
+      .leaflet-container {
+        font-family: "Lato", sans-serif;
+        font-weight: 400;
+        font-size: 1rem;
+      }
+
+      #slider,
+      #legend,
+      .modal-content {
+        background-color: #5e6a75;
+        color: white;
+      }
+
+      .dropdown-menu {
+        background-color: #5e6a75;
+      }
+
+      a.dropdown-item {
+        color: #fff;
+      }
+
+      .min {
+        float: left;
+      }
+
+      .max {
+        float: right;
+      }
+
+      /* When screen is 768px or wider */
+      @media screen and (min-width: 768px) {
+        #map {
+          border-top: none;
+        }
+
+        .legend {
+          display: block;
+        }
+
+        #legend button {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Header -->
+    <header id="header" class="d-flex flex-wrap justify-content-center py-3">
+      <h3 class="d-flex align-items-center ms-3 mb-3 mb-md-0 me-md-auto">
+        Heating Up?
+      </h3>
+
+      <div class="dropdown">
+        <select
+          id="dropdown-ui"
+          class="form-select"
+          aria-label="Default select"
+        >
+          <!-- <option selected>Choose a year to compare</option> -->
+          <option value="1910" selected>1910</option>
+          <option value="1920">1920</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- Map -->
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-12 p-0">
+          <div id="map"></div>
+          <!-- Map Info Button -->
+          <button
+            type="button"
+            id="modal-btn"
+            class="btn btn-primary mt-2 ms-2"
+            data-bs-toggle="modal"
+            data-bs-target="#Modal"
+          >
+            Map Info
+          </button>
+          <!-- UI Slider -->
+          <div id="slider" class="shadow-sm p-3 rounded-2">
+            <span class="min">Jan</span>
+            <span class="max">Dec</span>
+            <input type="range" class="form-range" min="0" max="11" step="1" />
+          </div>
+          <!-- Legend -->
+          <div id="legend" class="legend">
+            <!-- <div class="leaflet-legend">Legend goes here...</div> -->
+            <button id="btn-legend" class="btn btn-secondary float-end">
+              Legend
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Map Info Modal -->
+    <div
+      class="modal fade"
+      id="Modal"
+      tabindex="-1"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">...</div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
+      crossorigin="anonymous"
+    ></script>
+    <!-- Leaflet JS -->
+    <script
+      src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+      integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM="
+      crossorigin=""
+    ></script>
+    <!-- PapaParse JS -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"
+      integrity="sha512-dfX5uYVXzyU8+KHqj8bjo7UkOdg18PaOtpa48djpNbZHwExddghZ+ZmzWT06R5v6NSk3ZUfsH6FNEDepLx9hPQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <!-- Chroma JS -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.4.2/chroma.min.js"
+      integrity="sha512-zInFF17qBFVvvvFpIfeBzo7Tj7+rQxLeTJDmbxjBz5/zIr89YVbTNelNhdTT+/DCrxoVzBeUPVFJsczKbB7sew=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <!-- App JS -->
+    <script>
+      (function () {
+        // Adjust Height of map
+        adjustHeight();
+        window.addEventListener("resize", adjustHeight());
+
+        // Add event listener to toggle on/off the legend button
+        const button = document.querySelector("#legend button");
+        button.addEventListener("click", function () {
+          const legend = document.querySelector(".legend");
+          legend.classList.toggle("show-legend");
+        });
+
+        // Add Map
+        const map = L.map("map", {
+          center: [37.09024, -95.712891],
+          zoom: 5,
+          zoomControl: false,
+          attributionControl: false,
+        });
+
+        // Add Basemap
+        const tileLayer = L.tileLayer(
+          "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",
+          {
+            attribution:
+              '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: "abcd",
+            maxZoom: 20,
+          }
+        );
+        tileLayer.addTo(map);
+
+        let countiesLayer;
+        let dataLayer;
+
+        // AJAX request for GeoJSON data
+        fetch("../data/us_counties_2020_20m.geojson")
+          .then(function (response) {
+            return response.json();
+          })
+          .then(function (counties) {
+            countiesLayer = L.geoJSON(counties, {
+              style: function (feature) {
+                return {
+                  color: "#fff",
+                  weight: 1,
+                  fillOpacity: 0,
+                };
+              },
+            }).addTo(map);
+            return fetch("../data/data-by-decade-by-county.json");
+          })
+          .then(function (response) {
+            return response.json();
+          })
+          .then(function (response) {
+            mapIt(response);
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+
+        function mapIt(data) {
+          // Set comparison time
+          const time = "2020-1920";
+          let month = 0;
+          const breaks = [-41.9, -10, -2, -1, 0, 1, 2, 10, 15, 40.1];
+          const colors = [
+            "#87ceeb",
+            "#a4d7ed",
+            "#bedde8",
+            "#d4dfde",
+            "#e6decd",
+            "#f5d9b7",
+            "#fed19b",
+            "#ffc579",
+            "#ffb74f",
+            "#ffa500",
+          ];
+          const color = chroma.scale(colors).classes(breaks).mode("lch");
+          // Set interval to change month every second
+          setInterval(function () {
+            if (month < 11) {
+              month++;
+            } else {
+              month = 0;
+            }
+            // Change color of counties based on rendered data
+            countiesLayer.eachLayer(function (layer) {
+              if (
+                data[layer.feature.properties.GEOID] &&
+                data[layer.feature.properties.GEOID][time]
+              ) {
+                // Find the temp diff for the county and month
+                const a = data[layer.feature.properties.GEOID][time][month];
+                layer.setStyle({
+                  fillColor: color(a),
+                  fillOpacity: 1,
+                  color: color(a),
+                });
+                const popup = `<h5>${layer.feature.properties.NAME} ${layer.feature.properties.GEOID}</h5>Month: ${month}<br>Temp: ${a}`;
+                layer.bindPopup(popup);
+              }
+            });
+          }, 1000);
+        }
+
+        // Function to resize map
+        function adjustHeight() {
+          const mapSize = document.querySelector("#map"),
+            removeHeight = document.querySelector("#header").offsetHeight,
+            resize = window.innerHeight - removeHeight;
+          mapSize.style.height = `${resize}px`;
+        }
+        // ****** End adjustHeight ******
+
+        // Function to process the data
+        function processData(counties, data, year) {
+          let years = ["1900", year];
+
+          // Loop through all counties and add data
+          for (let i of counties.features) {
+            for (let y of years) {
+              for (let j of data.data) {
+                if (i.properties.GEOID === j.GEOID) {
+                  if (j.Year === y) {
+                    i.properties[y] = j;
+                    break;
+                  }
+                }
+              }
+            }
+            // for (let j of data.data) {
+            //   if (i.properties.GEOID === j.GEOID) {
+            //     if (j.Year === "1900") {
+            //       i.properties["1900"] = j;
+            //       break;
+            //     }
+            //   }
+            // }
+          }
+
+          console.log(counties);
+
+          // Empty array to hold data values
+          const rates = [];
+          // Empty object to hold difference values
+          var valueDiff = {
+            Year: years[1],
+          };
+          // Loop through counties and populate array
+          counties.features.forEach(function (county) {
+            const compProps = county.properties[years[1]];
+            const subProps = county.properties["1900"];
+            if (compProps && subProps) {
+              for (const prop in compProps) {
+                if (months.includes(prop) && Number(compProps[prop]) < 99.9) {
+                  var diff = Number(
+                    Number(
+                      Number(compProps[prop]) - Number(subProps[prop])
+                    ).toFixed(1)
+                  );
+                  rates.push(diff);
+                  valueDiff[prop] = diff;
+                }
+              }
+            }
+            // const props = county.properties["1900"];
+            // if (props) {
+            //   for (const prop in props) {
+            //     if (months.includes(prop) && Number(props[prop]) < 99.9) {
+            //       rates.push(Number(props[prop]));
+            //     }
+            //   }
+            // }
+          });
+          console.log(rates);
+          console.log(valueDiff);
+
+          // Create breaks
+          var breaks = chroma.limits(rates, "q", 5);
+          // Create color generator
+          var colorize = chroma
+            .scale(chroma.brewer.Oranges)
+            .classes(breaks)
+            .mode("lab");
+
+          drawMap(counties, colorize, valueDiff);
+          drawLegend(breaks, colorize);
+        }
+
+        // Function to draw data on the map
+        function drawMap(counties, colorize, valueDiff) {
+          const dataLayer = L.geoJson(counties, {
+            style: function (feature) {
+              return {
+                color: "#202020",
+                weight: 1,
+                fillOpacity: 1,
+                fillColor: "#363636",
+              };
+            },
+          }).addTo(map);
+
+          updateMap(dataLayer, colorize, "Jan", valueDiff);
+          addUI(dataLayer, colorize, "Jan", valueDiff);
+        }
+        // ****** End drawMap ******
+
+        // Function to update the map
+        function updateMap(dataLayer, colorize, currentMonth, valueDiff) {
+          dataLayer.eachLayer(function (layer) {
+            const props = layer.feature.properties[valueDiff.Year];
+            var tooltipInfo = "";
+            if (props) {
+              // Style the layer
+              layer.setStyle({
+                fillColor: colorize(valueDiff[currentMonth]),
+              });
+              // Create popup
+              tooltipInfo = `${valueDiff[currentMonth]}`;
+            } else {
+              tooltipInfo = `No Data`;
+            }
+
+            layer.bindTooltip(tooltipInfo);
+          });
+        }
+        // ****** End updateMap ******
+
+        // Function to draw the legend
+        function drawLegend(breaks, colorize) {
+          // Add Legend
+          const legendControl = L.control({
+            position: "bottomright",
+          });
+          legendControl.onAdd = function () {
+            const legend = L.DomUtil.get("legend");
+            L.DomEvent.disableScrollPropagation(legend);
+            L.DomEvent.disableClickPropagation(legend);
+            return legend;
+          };
+          legendControl.addTo(map);
+
+          // Build legend
+          const legend = document.querySelector(".legend");
+          legend.innerHTML = `<h3>Jan Average Temp (F)</h3><ul>`;
+          legend.innerHTML += `<li><span style="background:#363636"></span> No Data Available</li>`;
+
+          // Loop break values and add to legend
+          for (let i = 0; i < breaks.length - 1; i++) {
+            const color = colorize(breaks[i], breaks);
+            const classRange = `<li><span style="background:${color}"></span> ${
+              breaks[i]
+            } &mdash; ${breaks[i + 1]}</li>`;
+            legend.innerHTML += classRange;
+          }
+          legend.innerHTML += `</ul>`;
+        }
+        // ****** End drawLegend ******
+
+        // Function to add the UI Slider
+        function addUI(dataLayer, colorize, month, valueDiff) {
+          // Add Slider
+          const sliderControl = L.control({
+            position: "bottomleft",
+          });
+          sliderControl.onAdd = function () {
+            const controls = L.DomUtil.get("slider");
+            L.DomEvent.disableScrollPropagation(controls);
+            L.DomEvent.disableClickPropagation(controls);
+            return controls;
+          };
+          sliderControl.addTo(map);
+
+          // Get slider value
+          let currentMonth = month;
+          slider = document.querySelector(".form-range");
+          slider.addEventListener("input", function (e) {
+            // console.log(months[e.target.value]);
+            currentMonth = months[e.target.value];
+
+            // Update map with current month
+            updateMap(dataLayer, colorize, currentMonth, valueDiff);
+
+            // Update legend with current month
+            document.querySelector(
+              ".legend h3"
+            ).innerHTML = `${currentMonth} Average Temp (F)`;
+          });
+
+          // Get dropdown value
+          let dropdown = document.querySelector("#dropdown-ui");
+          dropdown.addEventListener("change", function (e) {
+            year = e.target.value;
+            console.log(year);
+          });
+        }
+        // ****** End addUI ******
+
+        // Function to get the selected year
+        function getYear() {}
+
+        /* When the user clicks on the button,
+      toggle between hiding and showing the dropdown content */
+        function myFunction() {
+          document.getElementById("myDropdown").classList.toggle("show");
+        }
+
+        function dropFilter() {
+          var input, filter, ul, li, a, i;
+          input = document.getElementById("myInput");
+          filter = input.value.toUpperCase();
+          div = document.getElementById("myDropdown");
+          a = div.getElementsByTagName("a");
+          for (i = 0; i < a.length; i++) {
+            txtValue = a[i].textContent || a[i].innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+              a[i].style.display = "";
+            } else {
+              a[i].style.display = "none";
+            }
+          }
+        }
+        // ****** End dropFilter ******
+      })();
+    </script>
+  </body>
+</html>
