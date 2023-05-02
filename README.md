@@ -2,6 +2,10 @@
 
 Welcome to my climate change project!
 
+Please feel free to read about the project below!
+
+Head on over to the [map](https://kdoh12.github.io/us-climate-change/)!
+
 ## Overview
 
 This project was created as the final project for MAP 673 in the [New Maps Plus](https://newmapsplus.github.io/) program at the [University of Kentucky](https://www.uky.edu/).
