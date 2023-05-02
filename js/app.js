@@ -3,13 +3,6 @@
   adjustHeight();
   window.addEventListener("resize", adjustHeight);
 
-  // Add event listener to toggle on/off the legend button
-  const button = document.querySelector("#legend button");
-  button.addEventListener("click", function () {
-    const legend = document.querySelector(".legend");
-    legend.classList.toggle("show-legend");
-  });
-
   // Add Map
   const map = L.map("map", {
     center: [37.09024, -95.712891],
@@ -33,13 +26,16 @@
       return response.json();
     })
     .then(function (counties) {
+      // Load csv data via PapaParse
       Papa.parse("data/AvgTempCounties_Annual.csv", {
         download: true,
         header: true,
         complete: function (data) {
+          // When data is loaded, call processData function
           processData(counties, data);
         },
       });
+      // Load the states boundaries
       return fetch("data/us_states_20m.geojson")
         .then(function (response) {
           return response.json();
@@ -72,6 +68,7 @@
       }
     }
 
+    // Call the drawMap function
     drawMap(counties);
   }
   // ****** End processData ******
@@ -101,27 +98,40 @@
 
     // Loop through counties
     dataLayer.eachLayer(function (layer) {
+      // Declare an empty variable to use in if/else statement
       let difference;
+      // Create shorthand
       const props = layer.feature.properties.Temp;
+      // If "props" exists
       if (props) {
+        // If there is a "startYear" and a "minYear", and they don't equal 99.9 (the no data value)
         if (props[startYear] && props[minYear] && props[startYear] != "99.9" && props[minYear] != "99.9") {
+          // Subtract minYear from startYear and round to 1 decimal
           difference = Number(Number(props[startYear] - props[minYear]).toFixed(1));
+          // Push into the rates array
           rates.push(difference);
         } else {
+          // If they don't exist or they equal 99.9
           difference = 99.9;
         }
       } else {
+        // If "props" doesn't exist
         difference = 99.9;
       }
+      // Add the difference value to the geojson
       layer.feature.properties.Difference = difference;
     });
 
     // Create breaks
     var breaks = getClassBreaks(rates);
 
+    // Loop through counties to build popup and assign color
     dataLayer.eachLayer(function (layer) {
+      // Create shorthand
       const props = layer.feature.properties;
+      // Start popup template
       let popupInfo = `<b>${props.NAME} County</b><br>`;
+      // Assign color and popup info if the value exists and isn't 99.9
       if (props.Difference && props.Difference < 99.9) {
         layer.setStyle({
           fillColor: getColor(props.Difference, breaks), // colorize(props.Difference),
@@ -131,11 +141,14 @@
                         ${startYear}: ${props.Temp[startYear]} &deg;F<br>
                         Difference: ${props.Difference} &deg;F`;
       } else {
+        // Build popup if value doesn't exist or is 99.9
         popupInfo += `No Data Available`;
       }
 
+      // Attach popup
       layer.bindPopup(popupInfo);
 
+      // Change style when mouse moves over county
       layer.on("mouseover", function () {
         layer
           .setStyle({
@@ -146,6 +159,7 @@
           .bringToFront();
       });
 
+      // Change style back when mouse moves away from county
       layer.on("mouseout", function () {
         layer
           .setStyle({
@@ -156,6 +170,8 @@
           .bringToBack();
       });
 
+      // Change the style when the popup opens
+      // This is mainly for mobile users so they have visual affordance
       layer.on("popupopen", function () {
         layer
           .setStyle({
@@ -165,6 +181,8 @@
           .bringToFront();
       });
 
+      // Change style back when popup closes
+      // This is mainly for mobile users so they have visual affordance
       layer.on("popupclose", function () {
         layer
           .setStyle({
@@ -175,25 +193,29 @@
       });
     });
 
+    // Call the drawLegend function
     drawLegend(breaks);
   }
   // ****** End updateMap ******
 
   // // Function to draw the legend
-  function drawLegend(breaks, colorize) {
+  function drawLegend(breaks) {
     // Add Legend
     const legendControl = L.control({
       position: "bottomright",
     });
+    // When legend gets added...
     legendControl.onAdd = function () {
       const legend = L.DomUtil.get("legend");
+      // Disable scroll and click events
       L.DomEvent.disableScrollPropagation(legend);
       L.DomEvent.disableClickPropagation(legend);
       return legend;
     };
+    // Add legend to the map
     legendControl.addTo(map);
 
-    // Build legend
+    // Build initial legend
     const legend = document.querySelector("#legend");
     legend.innerHTML = `<h3>Temp (&deg;F) Difference</h3><ul>`;
     legend.innerHTML += `<li><span style="background:#363636"></span> No Data</li>`;
@@ -212,26 +234,31 @@
   function addUI(dataLayer, startYear, minYear) {
     // Get dropdown value
     let minDropdown = document.querySelector("#minYear");
+    // Add event listener to dropdown for when selection changes
     minDropdown.addEventListener("change", function (e) {
       minYear = e.target.value;
-      console.log(minYear);
+      // console.log(minYear);
     });
 
     // Get dropdown value
     let startDropdown = document.querySelector("#startYear");
+    // Add event listener to dropdown for when selection changes
     startDropdown.addEventListener("change", function (e) {
       startYear = e.target.value;
-      console.log(startYear);
+      // console.log(startYear);
     });
 
     // Add Calculate button functionality
     const calcButton = document.querySelector("#calculate");
+    // Add an event listener for when the button is clicked
     calcButton.addEventListener("click", function (e) {
+      // if/else statements to prevent user from miscalculating
       if (Number(startYear - minYear) < 0) {
         return alert("Please choose a starting decade lower than the ending decade.");
       } else if (Number(startYear - minYear === 0)) {
         return alert("The starting and ending decade are the same. Please choose a starting decade lower than the ending decade.");
       } else {
+        // If everything is fine, call the updateMap function
         updateMap(dataLayer, startYear, minYear);
       }
     });
@@ -240,14 +267,17 @@
 
   // Function to get class breaks
   function getClassBreaks(rates) {
+    // Create clusters using simple statistics
     const clusters = ss.ckmeans(rates, 5);
 
+    // Create the breaks based on the clusters
     const breaks = clusters.map(function (cluster) {
       return [cluster[0], cluster.pop()];
     });
 
     return breaks;
   }
+  // ****** End getClassBreaks ******
 
   // Function to get color
   function getColor(value, breaks) {
@@ -263,6 +293,7 @@
       return "#d7191c";
     }
   }
+  // ****** End getColor ******
 
   // Function to add states
   function addStates(states) {
@@ -278,6 +309,7 @@
       },
     }).bringToFront();
 
+    // Add states to the map
     statesLayer.addTo(map);
   }
 })();
