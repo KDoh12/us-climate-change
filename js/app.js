@@ -5,7 +5,7 @@
 
   // Add Map
   const map = L.map("map", {
-    center: [37.09024, -95.712891],
+    center: [38.5, -95.5],
     zoom: 5,
     zoomControl: false,
     attributionControl: false,
@@ -85,6 +85,17 @@
         };
       },
     }).addTo(map);
+
+    // If the window is smaller than a desktop
+    if (window.screen.width < 1400) {
+      // Create lat and lng to fit map to screen
+      bounds = [
+        [53.83, -66.27],
+        [20.34, -125.51],
+      ];
+      // Fit the map to defined lat and lng so that the U.S. will appear at any device screen
+      map.fitBounds(bounds);
+    }
 
     updateMap(dataLayer, "1910", "1900");
     addUI(dataLayer, "1910", "1900");
