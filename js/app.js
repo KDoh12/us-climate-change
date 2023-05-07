@@ -97,8 +97,8 @@
       map.fitBounds(bounds);
     }
 
-    updateMap(dataLayer, "1910", "1900");
-    addUI(dataLayer, "1910", "1900");
+    updateMap(dataLayer, "2020", "1900");
+    addUI(dataLayer, "2020", "1900");
   }
   // ****** End drawMap ******
 
@@ -249,6 +249,7 @@
     minDropdown.addEventListener("change", function (e) {
       minYear = e.target.value;
       // console.log(minYear);
+      calculateCompare();
     });
 
     // Get dropdown value
@@ -257,12 +258,10 @@
     startDropdown.addEventListener("change", function (e) {
       startYear = e.target.value;
       // console.log(startYear);
+      calculateCompare();
     });
 
-    // Add Calculate button functionality
-    const calcButton = document.querySelector("#calculate");
-    // Add an event listener for when the button is clicked
-    calcButton.addEventListener("click", function (e) {
+    function calculateCompare() {
       // if/else statements to prevent user from miscalculating
       if (Number(startYear - minYear) < 0) {
         return alert("Please choose a starting decade lower than the ending decade.");
@@ -272,7 +271,7 @@
         // If everything is fine, call the updateMap function
         updateMap(dataLayer, startYear, minYear);
       }
-    });
+    }
   }
   // ****** End addUI ******
 
@@ -293,15 +292,15 @@
   // Function to get color
   function getColor(value, breaks) {
     if (value <= breaks[0][1]) {
-      return "#2b83ba";
+      return "#0571b0";
     } else if (value <= breaks[1][1]) {
-      return "#abdda4";
+      return "#92c5de";
     } else if (value <= breaks[2][1]) {
-      return "#ffffbf";
+      return "#f7f7f7";
     } else if (value <= breaks[3][1]) {
-      return "#fdae61";
+      return "#f4a582";
     } else if (value <= breaks[4][1]) {
-      return "#d7191c";
+      return "#ca0020";
     }
   }
   // ****** End getColor ******
