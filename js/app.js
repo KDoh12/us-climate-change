@@ -293,15 +293,15 @@
   // Function to get color
   function getColor(value, breaks) {
     if (value <= breaks[0][1]) {
-      return "#2b83ba";
+      return "#0571b0";
     } else if (value <= breaks[1][1]) {
-      return "#abdda4";
+      return "#92c5de";
     } else if (value <= breaks[2][1]) {
-      return "#ffffbf";
+      return "#f7f7f7";
     } else if (value <= breaks[3][1]) {
-      return "#fdae61";
+      return "#f4a582";
     } else if (value <= breaks[4][1]) {
-      return "#d7191c";
+      return "#ca0020";
     }
   }
   // ****** End getColor ******
