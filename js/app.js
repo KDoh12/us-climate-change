@@ -97,8 +97,8 @@
       map.fitBounds(bounds);
     }
 
-    updateMap(dataLayer, "1910", "1900");
-    addUI(dataLayer, "1910", "1900");
+    updateMap(dataLayer, "2020", "1900");
+    addUI(dataLayer, "2020", "1900");
   }
   // ****** End drawMap ******
 
