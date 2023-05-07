@@ -249,6 +249,7 @@
     minDropdown.addEventListener("change", function (e) {
       minYear = e.target.value;
       // console.log(minYear);
+      calculateCompare();
     });
 
     // Get dropdown value
@@ -257,12 +258,10 @@
     startDropdown.addEventListener("change", function (e) {
       startYear = e.target.value;
       // console.log(startYear);
+      calculateCompare();
     });
 
-    // Add Calculate button functionality
-    const calcButton = document.querySelector("#calculate");
-    // Add an event listener for when the button is clicked
-    calcButton.addEventListener("click", function (e) {
+    function calculateCompare() {
       // if/else statements to prevent user from miscalculating
       if (Number(startYear - minYear) < 0) {
         return alert("Please choose a starting decade lower than the ending decade.");
@@ -272,7 +271,7 @@
         // If everything is fine, call the updateMap function
         updateMap(dataLayer, startYear, minYear);
       }
-    });
+    }
   }
   // ****** End addUI ******
 
